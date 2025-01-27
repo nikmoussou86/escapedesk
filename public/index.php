@@ -3,13 +3,32 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use DI\ContainerBuilder;
+use Dotenv\Dotenv;
+use Doctrine\DBAL\DriverManager;
 use Laminas\Diactoros\ServerRequestFactory;
 
-$containerBuilder = new ContainerBuilder();
+$dotenv = Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load();
 
-// Include the DI configurations if needed (optional).
-$container = $containerBuilder->build();
+
+
+$connectionParams = [
+    'dbname' => $_ENV['DB_NAME'],
+    'user' => $_ENV['DB_USER'],
+    'password' => $_ENV['DB_PASS'],
+    'host' => $_ENV['DB_HOST'],
+    'port' => $_ENV['DB_PORT'],
+    'driver' => $_ENV['DB_DRIVER'] ?? 'pdo_mysql',
+];
+$conn = DriverManager::getConnection($connectionParams);
+$stmt = $conn->prepare('SELECT * FROM users');
+$result = $stmt->executeQuery();
+var_dump($result->fetchAllAssociative());
+
+
+
+// Create a DI container
+$container = require_once __DIR__ .'/../bootstrap.php';
 
 // Load routes from the routes definition file.
 $routes = require __DIR__ . '/../app/Routes/routes.php';
