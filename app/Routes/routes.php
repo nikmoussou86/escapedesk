@@ -12,5 +12,15 @@ return function (RouteCollector $r) {
     // Authentication routes
     $r->get('/login', 'AuthController@showLoginForm');
     $r->post('/login', 'AuthController@login');
+
     $r->post('/logout', 'AuthController@logout');
+    
+    
+    $r->addGroup('/users', function (RouteCollector $r) {
+        $r->addRoute('GET', '/create', 'UserController@create');
+        $r->addRoute('POST', '/store', 'UserController@store');
+        $r->addRoute('GET', '/edit/{userId}', 'UserController@edit');
+        $r->addRoute('POST', '/update', 'UserController@update');
+        $r->addRoute('POST', '/delete/{userId}', 'UserController@delete');
+    });
 };

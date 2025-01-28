@@ -3,16 +3,19 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Services\AuthService;
 use Psr\Http\Message\ServerRequestInterface;
+use App\Repositories\Contracts\PasswordHasherInterface;
+use App\Repositories\Contracts\SessionManagerInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
 
 class AuthController
 {
-    private AuthService $authService;
-
-    public function __construct(AuthService $authService)
+    public function __construct(
+        private UserRepositoryInterface $userRepository,
+        private PasswordHasherInterface $passwordHasher,
+        private SessionManagerInterface $sessionManager,
+    )
     {
-        $this->authService = $authService;
     }
 
     public function showLoginForm(): string
@@ -29,22 +32,33 @@ class AuthController
         HTML;
     }
 
-    public function login(ServerRequestInterface $request): string
+    public function login(ServerRequestInterface $request): bool
     {
         $data = $request->getParsedBody();
 
-        if ($this->authService->authenticate($data['email'], $data['password'])) {
-            // Redirect or display success message.
-            return "Login successful! <a href='/'>Go to home</a>";
+        // Find the user by email
+        $user = $this->userRepository->findByCredentials($data['email'], $data['password']);
+
+        if (!$user) {
+            return false; // User not found
+        }
+        
+        // Verify the password
+        if (!$this->passwordHasher->verify($data['password'], $user->getPassword())) {
+            return false;
         }
 
-        http_response_code(401);
-        return "Invalid credentials. <a href='/login'>Try again</a>";
+        // Start the session and store user data
+        $this->sessionManager->start();
+        $this->sessionManager->set('user_id', $user->getId());
+        $this->sessionManager->regenerate();        
+
+        return true;
     }
 
     public function logout(): string
     {
-        $this->authService->logout();
-        return "You have been logged out. <a href='/'>Go to home</a>";
+        $this->sessionManager->destroy();
+        return "You have been logged out.";
     }
 }

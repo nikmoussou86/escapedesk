@@ -1,4 +1,4 @@
+/docker/storage
+/vendor
 .env
 composer.lock
-/docker/storage/*
-/vendor
