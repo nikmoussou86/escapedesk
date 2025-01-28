@@ -16,6 +16,12 @@ class UserRepository implements UserRepositoryInterface {
     {    
     }
 
+    public function getAll()
+    {
+        $userRepository = $this->entityManager->getRepository(User::class);
+        return $userRepository->findAll();
+    }
+
     public function create(array $data): void {
         $user = new User();
         $user->setUsername($data['user_name']);

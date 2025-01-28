@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 
+use Twig\Environment;
 use App\Repositories\UserRepository;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -11,29 +12,58 @@ use Psr\Http\Message\ServerRequestInterface;
 class UserController
 {
     public function __construct(
-        private UserRepository $userRepository
+        private UserRepository $userRepository,
+        private Environment $twig,
     )
     {}
 
     public function index()
-    {}
+    {
+        // $users = [
+        //     [
+        //         'id' => 1,
+        //         'name' => 'John Doe',
+        //         'email' => 'john.doe@example.com',
+        //         'employee_code' => 'EMP001',
+        //     ],
+        //     [
+        //         'id' => 2,
+        //         'name' => 'Jane Smith',
+        //         'email' => 'jane.smith@example.com',
+        //         'employee_code' => 'EMP002',
+        //     ],
+        //     [
+        //         'id' => 3,
+        //         'name' => 'Alice Johnson',
+        //         'email' => 'alice.johnson@example.com',
+        //         'employee_code' => 'EMP003',
+        //     ],
+        // ];
+
+        $users = $this->userRepository->getAll();
+
+        return $this->twig->render('users/index.twig', [
+            'users' => $users
+        ]);
+    }
 
     public function create(): string
     {
         // Todo: Replace with a proper templating engine.
-        return <<<HTML
-            <form action="/users/store" method="POST">
-                <label for="user_name">Username:</label>
-                <input type="text" name="user_name" id="user_name" required>
-                <label for="email">Email:</label>
-                <input type="email" name="email" id="email" required>
-                <label for="password">Password:</label>
-                <input type="password" name="password" id="password" required>
-                <label for="type">Type:</label>
-                <input type="number" name="type" id="type" required>
-                <button type="submit">Create</button>
-            </form>
-        HTML;
+        return $this->twig->render('users/create.twig');
+        // return <<<HTML
+        //     <form action="/users/store" method="POST">
+        //         <label for="user_name">Username:</label>
+        //         <input type="text" name="user_name" id="user_name" required>
+        //         <label for="email">Email:</label>
+        //         <input type="email" name="email" id="email" required>
+        //         <label for="password">Password:</label>
+        //         <input type="password" name="password" id="password" required>
+        //         <label for="type">Type:</label>
+        //         <input type="number" name="type" id="type" required>
+        //         <button type="submit">Create</button>
+        //     </form>
+        // HTML;
     }
 
     public function store(ServerRequestInterface $request)
@@ -49,24 +79,9 @@ class UserController
         $user = $this->userRepository->findByUserId(intval($params['userId']));
 
         if ($user) {
-            // Todo: Replace with a proper templating engine.
-            return <<<HTML
-                <form action="/users/update" method="POST">
-                    <label for="user_name">Username:</label>
-                    <input type="text" name="user_name" id="user_name" value="{$user->getUserName()}" required>
-                    
-                    <label for="email">Email:</label>
-                    <input type="email" name="email" id="email" value="{$user->getEmail()}" required>
-                    
-                    <label for="password">Password:</label>
-                    <input type="password" name="password" id="password" required>
-                    
-                    <label for="type">Type:</label>
-                    <input type="number" name="type" id="type" value="{$user->getType()->value}" required>
-                    
-                    <button type="submit">Update</button>
-                </form>
-            HTML;
+            return $this->twig->render('users/edit.twig', [
+                'user' => $user
+            ]);
         }
     }
 

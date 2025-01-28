@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use Twig\Environment;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Repositories\Contracts\PasswordHasherInterface;
 use App\Repositories\Contracts\SessionManagerInterface;
@@ -14,22 +15,25 @@ class AuthController
         private UserRepositoryInterface $userRepository,
         private PasswordHasherInterface $passwordHasher,
         private SessionManagerInterface $sessionManager,
+        private Environment $twig,
     )
     {
     }
 
     public function showLoginForm(): string
     {
+        // Render the login form using Twig
+        return $this->twig->render('auth/login.twig');
         // Render a simple login form (this can be replaced with a proper templating engine).
-        return <<<HTML
-            <form action="/login" method="POST">
-                <label for="email">Email:</label>
-                <input type="email" name="email" id="email" required>
-                <label for="password">Password:</label>
-                <input type="password" name="password" id="password" required>
-                <button type="submit">Login</button>
-            </form>
-        HTML;
+        // return <<<HTML
+        //     <form action="/login" method="POST">
+        //         <label for="email">Email:</label>
+        //         <input type="email" name="email" id="email" required>
+        //         <label for="password">Password:</label>
+        //         <input type="password" name="password" id="password" required>
+        //         <button type="submit">Login</button>
+        //     </form>
+        // HTML;
     }
 
     public function login(ServerRequestInterface $request): bool

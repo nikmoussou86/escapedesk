@@ -17,10 +17,11 @@ return function (RouteCollector $r) {
     
     
     $r->addGroup('/users', function (RouteCollector $r) {
+        $r->addRoute('GET', '', 'UserController@index');
         $r->addRoute('GET', '/create', 'UserController@create');
         $r->addRoute('POST', '/store', 'UserController@store');
         $r->addRoute('GET', '/edit/{userId}', 'UserController@edit');
-        $r->addRoute('POST', '/update', 'UserController@update');
+        $r->addRoute('POST', '/update/{userId}', 'UserController@update');
         $r->addRoute('POST', '/delete/{userId}', 'UserController@delete');
     });
 };

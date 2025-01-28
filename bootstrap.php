@@ -1,8 +1,10 @@
 <?php
 declare(strict_types=1);
 
+use Twig\Environment;
 use DI\ContainerBuilder;
 use Doctrine\ORM\EntityManager;
+use Twig\Loader\FilesystemLoader;
 use App\Controllers\AuthController;
 use App\Repositories\UserRepository;
 use Psr\Container\ContainerInterface;
@@ -34,12 +36,18 @@ $containerBuilder->addDefinitions([
     PasswordHasherInterface::class => function () {
         return new BcryptPasswordHasher();
     },
+    // Twig templating engine
+    Environment::class => function () {
+        $loader = new FilesystemLoader(__DIR__ . '/views');
+        return new Environment($loader);
+    },
     // Authentication controller
     AuthController::class => function (ContainerInterface $c) {
         return new AuthController(
             $c->get(UserRepositoryInterface::class),
             $c->get(PasswordHasherInterface::class),
-            $c->get(NativeSessionManager::class)
+            $c->get(NativeSessionManager::class),
+            $c->get(Environment::class)
         );
     },
 ]);
