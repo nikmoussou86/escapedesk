@@ -16,7 +16,7 @@ class UserRepository implements UserRepositoryInterface {
     {    
     }
 
-    public function getAll()
+    public function findAll()
     {
         $userRepository = $this->entityManager->getRepository(User::class);
         return $userRepository->findAll();
@@ -26,6 +26,7 @@ class UserRepository implements UserRepositoryInterface {
         $user = new User();
         $user->setUsername($data['user_name']);
         $user->setEmail($data['email']);
+        $user->setEmployeeCode($data['employee_code']);
         $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
         $user->setType(UserType::tryFrom(intval($data['type'])));
         $user->setCreatedAt(new \DateTime());
@@ -39,8 +40,9 @@ class UserRepository implements UserRepositoryInterface {
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
         $user->setUsername($data['user_name']);
         $user->setEmail($data['email']);
+        $user->setEmployeeCode($data['employee_code']);
         $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
-        $user->setType(UserType::tryFrom(intval($data['type'])));        
+        $user->setType(UserType::tryFrom(value: intval($data['type'])));        
         $user->setUpdatedAt(new \DateTime());
 
         $this->entityManager->persist($user);

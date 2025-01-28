@@ -29,6 +29,9 @@ class User
     
     #[Column]
     private string $password;
+
+    #[Column('employee_code')]
+    private string $employeeCode;
     
     #[Column]
     private UserType $type;
@@ -76,9 +79,20 @@ class User
         return $this;
     }
 
-    public function getType(): UserType
+    public function getEmployeeCode(): string
     {
-        return $this->type;
+        return $this->employeeCode;
+    }
+
+    public function setEmployeeCode(string $employeeCode): User
+    {
+        $this->employeeCode = $employeeCode;
+        return $this;
+    }
+
+    public function getType(): string
+    {
+        return ($this->type)->label();
     }
 
     public function setType(UserType $type): User
