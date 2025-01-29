@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Entity\User;
-use App\Enums\UserType;
 use App\Enums\RequestStatus;
 use App\Entity\VacationRequest;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use App\Repositories\Contracts\VacationRequestRepositoryInterface;
 
 class VacationRequestRepository implements VacationRequestRepositoryInterface {
@@ -49,34 +49,52 @@ class VacationRequestRepository implements VacationRequestRepositoryInterface {
     }
 
     public function create(array $data): void {
-        $vacationRequest = new VacationRequest();
-        $vacationRequest->setReason($data['reason']);
-        $vacationRequest->setDateFrom(\DateTime::createFromFormat('Y-m-d', $data['date_from']));
-        $vacationRequest->setDateTo( \DateTime::createFromFormat('Y-m-d', $data['date_to']));
-        $vacationRequest->setRequestStatus(RequestStatus::PENDING);
-        $vacationRequest->setUserId(intval($data['user_id']));
-        $vacationRequest->setCreatedAt(new \DateTime());
-        $vacationRequest->setUpdatedAt(new \DateTime());
+        try {
+            $vacationRequest = new VacationRequest();
+            $vacationRequest->setReason($data['reason']);
+            $vacationRequest->setDateFrom(\DateTime::createFromFormat('Y-m-d', $data['date_from']));
+            $vacationRequest->setDateTo(\DateTime::createFromFormat('Y-m-d', $data['date_to']));
+            $vacationRequest->setRequestStatus(RequestStatus::PENDING);
+            $vacationRequest->setUserId(intval($data['user_id']));
+            $vacationRequest->setCreatedAt(new \DateTime());
+            $vacationRequest->setUpdatedAt(new \DateTime());
 
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['id' => intval($data['user_id'])]);
-        $vacationRequest->setUser($user);
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['id' => intval($data['user_id'])]);
+            if (!$user) {
+                throw new \Exception('User not found');
+            }
+            $vacationRequest->setUser($user);
 
-        $this->entityManager->persist($vacationRequest);
-        $this->entityManager->flush();
+            $this->entityManager->persist($vacationRequest);
+            $this->entityManager->flush();
+        } catch (ORMException | \Exception $e) {
+            throw new \Exception('Failed to create vacation request: ' . $e->getMessage());
+        }
     }
 
     public function update(array $data): void {
-        $vacationRequest = $this->entityManager->getRepository(VacationRequest::class)->findOneBy(['id' => $data['id']]);
-        $vacationRequest->setRequestStatus(RequestStatus::tryFrom(intval($data['status'])));
-        $vacationRequest->setUpdatedAt(new \DateTime());
+        try {
+            $vacationRequest = $this->entityManager->getRepository(VacationRequest::class)->findOneBy(['id' => $data['id']]);
+            if (!$vacationRequest) {
+                throw new \Exception('Vacation request not found');
+            }
+            $vacationRequest->setRequestStatus(RequestStatus::tryFrom(intval($data['status'])));
+            $vacationRequest->setUpdatedAt(new \DateTime());
 
-        $this->entityManager->persist($vacationRequest);
-        $this->entityManager->flush();
+            $this->entityManager->persist($vacationRequest);
+            $this->entityManager->flush();
+        } catch (ORMException | \Exception $e) {
+            throw new \Exception('Failed to update vacation request: ' . $e->getMessage());
+        }
     }
 
     public function delete(VacationRequest $vacationRequest): void {
-        $this->entityManager->remove($vacationRequest);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($vacationRequest);
+            $this->entityManager->flush();
+        } catch (ORMException | \Exception $e) {
+            throw new \Exception('Failed to delete vacation request: ' . $e->getMessage());
+        }
     }
 
     public function findByVacationRequestId(int $id): ?array {
