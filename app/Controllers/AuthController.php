@@ -91,6 +91,19 @@ class AuthController extends BaseController
         }
     }
 
+    private function getAuthUser(): ?User
+    {        
+        if (isset($_SESSION['user_id'])) {
+            $authUser = $this->userRepository->findByUserId(intval($_SESSION['user_id']));
+
+            if ($authUser) {
+                return $authUser;
+            }
+            return null;
+        }
+        return null;
+    }
+
     public function logout(): string
     {
         $this->sessionHandler->destroy();
