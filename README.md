@@ -39,7 +39,12 @@ $ composer install
 ```
 **Step 6**: In the same terminal inside the `escapedesk-app` container run the migrations:
 ```
-./vendor/bin/doctrine-migrations migrate
+$ ./vendor/bin/doctrine-migrations migrate
+```
+**Step 7**: Finally you navigate to the `scripts` folder and run the `users_seeder.php` script to insert 2 initial users of the app in the database. To do so execute the follow command inside `docker-app` container:
+```
+$ cd scripts
+$ php users_seeder.php
 ```
 Congrats! You made it!
 
@@ -47,5 +52,5 @@ Congrats! You made it!
 
 1. Open the browser and go to `http://localhost:8000`
 2. You should see the login page
-3. Login as a **Manager** using `manager@email.com | pass: 123456` or as an **Employee** using `employee@email.com | pass: 123456`
+3. Login as a **Manager** using `manager@example.com | pass: securepass123` or as an **Employee** using `employee@example.com | pass: securepass123`
    
