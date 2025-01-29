@@ -1,9 +1,9 @@
 {% extends './base.twig' %}
 
-{% block title %}Edit Vacation Request - My App{% endblock %}
+{% block title %}Edit Vacation Request - escapedesk{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+<div class="w-full max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
     <h1 class="text-2xl font-semibold mb-4">Edit Vacation Request</h1>
     <form action="/vacation_requests/update" method="POST" class="space-y-4">
         <input type="hidden" name="id" value="{{ vacationRequest.id }}" />

@@ -3,30 +3,53 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Entity\User;
 use Twig\Environment;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Repositories\Contracts\PasswordHasherInterface;
-use App\Repositories\Contracts\SessionManagerInterface;
+use App\Repositories\Contracts\SessionHandlerInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 
-class AuthController
+class AuthController extends BaseController
 {
     public function __construct(
-        private UserRepositoryInterface $userRepository,
+        protected SessionHandlerInterface $sessionHandler,
+        protected UserRepositoryInterface $userRepository,
         private PasswordHasherInterface $passwordHasher,
-        private SessionManagerInterface $sessionManager,
         private Environment $twig,
     )
     {
     }
 
+    public function index(): void
+    {
+        // If user is not logged in go to login page
+        if (!$this->sessionHandler->userIsLoggedIn()) {
+            header('Location: /login');
+            exit;
+        }
+
+        // Get auth user
+        $authUser = $this->getAuthUser();
+        if ($authUser) {
+            // Redirect baesed on role
+            $this->roleBasedRedirect($authUser);
+        }
+    }
+
     public function showLoginForm(): string
     {
+        if ($this->sessionHandler->userIsLoggedIn()) {
+            header('Location: /users');
+            exit;
+        }
+
         // Render the login form
         return $this->twig->render('auth/login.twig');
     }
 
-    public function login(ServerRequestInterface $request): bool
+
+    public function login(ServerRequestInterface $request): void
     {
         $data = $request->getParsedBody();
 
@@ -34,25 +57,44 @@ class AuthController
         $user = $this->userRepository->findByCredentials($data['email'], $data['password']);
 
         if (!$user) {
-            return false; // User not found
+            throw new \Exception('User not found!');
         }
         
         // Verify the password
         if (!$this->passwordHasher->verify($data['password'], $user->getPassword())) {
-            return false;
+            throw new \Exception('Invalid pasword!');
         }
 
         // Start the session and store user data
-        $this->sessionManager->start();
-        $this->sessionManager->set('user_id', $user->getId());
-        $this->sessionManager->regenerate();        
+        $this->sessionHandler->set( 'user_id', intval($user->getId()));
 
-        return true;
+        $this->roleBasedRedirect($user);
+    }
+
+    private function roleBasedRedirect(User $user)
+    {
+        try {
+            // If user is logged in and manager go to 'users' list page
+            if ($user->userIsManager()) {
+                header('Location: /users');
+                exit;
+            }
+    
+            // If user is logged in and employee go to 'vac requests' list page
+            if ($user->userIsEmployee()) {
+                header('Location: /vacation_requests');
+                exit;
+            }
+        } catch (\Exception $e) {
+            echo "User doesnt have any available role! {$e->getMessage()}";
+            die;
+        }
     }
 
     public function logout(): string
     {
-        $this->sessionManager->destroy();
-        return "You have been logged out.";
+        $this->sessionHandler->destroy();
+        header('Location: /login');
+        exit;
     }
 }

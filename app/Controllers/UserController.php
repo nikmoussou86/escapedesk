@@ -3,39 +3,52 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-
+use App\Entity\User;
 use Twig\Environment;
-use App\Enums\UserType;
-use App\Repositories\UserRepository;
 use Psr\Http\Message\ServerRequestInterface;
+use App\Repositories\Contracts\SessionHandlerInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
 
 
-class UserController
+class UserController extends BaseController
 {
     public function __construct(
-        private UserRepository $userRepository,
-        private Environment $twig,
+        protected SessionHandlerInterface $sessionHandler,
+        protected UserRepositoryInterface $userRepository,
+        protected Environment $twig,
     )
-    {}
+    {
+    }
 
     public function index()
     {
+        $this->hasAccess('user.view_all');
         $users = $this->userRepository->findAll();
 
         return $this->twig->render('users/index.twig', [
+            'authUser' => $this->getAuthUser(),
             'users' => $users,
-            'userType' => UserType::class,
         ]);
     }
 
     public function create(): string
     {
-        return $this->twig->render('users/create.twig');
+        $this->hasAccess('user.create');
+
+        return $this->twig->render('users/create.twig', [
+            'authUser' => $this->getAuthUser(),
+        ]);
     }
 
     public function store(ServerRequestInterface $request)
     {
         $data = $request->getParsedBody();
+
+        if (!preg_match('/^\d{7}$/', $data['employee_code'])) {
+            throw new \InvalidArgumentException("Code must be exactly 7 digits.");
+
+            // Todo: return some error message to the user
+        }
 
         // Store the user in the database
         $this->userRepository->create($data);
@@ -46,11 +59,14 @@ class UserController
 
     public function edit(ServerRequestInterface $request, array $params)
     {
+        $this->hasAccess('user.edit');
+
         $user = $this->userRepository->findByUserId(intval($params['userId']));
 
         if ($user) {
             return $this->twig->render('users/edit.twig', [
-                'user' => $user
+                'user' => $user,
+                'authUser' => $this->getAuthUser(),
             ]);
         }
     }
@@ -58,6 +74,8 @@ class UserController
 
     public function update(ServerRequestInterface $request)
     {
+        $this->hasAccess('user.update');
+
         $data = $request->getParsedBody();
 
         // Update the user in the database
@@ -67,9 +85,10 @@ class UserController
         exit;
     }
 
-    public function delete(ServerRequestInterface $request, array $params)
+    public function delete(ServerRequestInterface $request)
     {
-        $user = $this->userRepository->findByUserId(intval($params['userId']));
+        $data = $request->getParsedBody();
+        $user = $this->userRepository->findByUserId(intval($data['id']));
 
         if ($user) {
             $this->userRepository->delete($user);
@@ -78,5 +97,18 @@ class UserController
             exit;
         }
         return false;
+    }
+
+    protected function getAuthUser(): ?User
+    {        
+        if (isset($_SESSION['user_id'])) {
+            $authUser = $this->userRepository->findByUserId(intval($_SESSION['user_id']));
+
+            if ($authUser) {
+                return $authUser;
+            }
+            return null;
+        }
+        return null;
     }
 }

@@ -1,11 +1,26 @@
-<nav class="flex justify-between items-center">
+<nav class="flex justify-between items-center bg-gray-800 text-white py-4 px-6 shadow-md">
     <div class="text-lg font-semibold">
         <a href="/" class="hover:text-gray-300">escapedesk</a>
     </div>
-    <ul class="flex space-x-4">
-        <li><a href="/users" class="hover:text-gray-300">Users</a></li>
-        <li><a href="/vacation_requests" class="hover:text-gray-300">Vacation Requests</a></li>
-        <li><a href="/login" class="hover:text-gray-300">Login</a></li>
-        <li><a href="/logout" class="hover:text-gray-300">Logout</a></li>
+    <ul class="flex space-x-6 item-center">
+        {% if (authUser.getTypeLabel() == 'Manager') %}
+            <li><a href="/users" class="hover:text-gray-300">Users</a></li>
+            <li><a href="/vacation_requests" class="hover:text-gray-300">Vacation Requests</a></li>
+        {% endif %}
+
+        {% if (authUser) %}
+            <li class="">{{ authUser.userName }} ({{ authUser.getTypeLabel() }})</li>
+            <li>
+                <a href="/logout" class="hover:text-gray-300 px-3 py-2 rounded-md bg-red-600 hover:bg-red-700 transition">
+                    Logout
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <a href="/login" class="hover:text-gray-300 px-3 py-2 rounded-md bg-blue-600 hover:bg-blue-700 transition">
+                    Login
+                </a>
+            </li>
+        {% endif %}
     </ul>
 </nav>

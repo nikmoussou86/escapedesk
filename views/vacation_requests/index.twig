@@ -1,13 +1,15 @@
 {% extends 'base.twig' %}
 
-{% block title %}Vacation Requests - My App{% endblock %}
+{% block title %}Vacation Requests - escapedesk{% endblock %}
 
 {% block content %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 class="text-2xl font-bold mb-6">Vacation Requests</h1>
-        <div className="px-4 py-4 sm:px-0  flex justify-end">
-            <a href="/vacation_requests/create" class="inline-block mb-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">New Request</a>
-        </div>
+        {% if (authUser.getTypeLabel() == 'Employee') %}
+            <div className="px-4 py-4 sm:px-0  flex justify-end">
+                <a href="/vacation_requests/create" class="inline-block mb-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">New Request</a>
+            </div>
+        {% endif %}
         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -27,12 +29,16 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions (manager)
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions (employee)
-                        </th>
+                        {% if (authUser.getTypeLabel() == 'Manager') %}
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        {% endif %}
+                        {% if (authUser.getTypeLabel() == 'Employee') %}
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -53,16 +59,21 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ request.status }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="/vacation_requests/edit/{{ request.id }}" class="text-blue-600 hover:text-blue-900 mr-4">Update</a>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                {% if request.status == 'Pending' %}
-                                    <form action="/users/delete/{{ user.id }}" method="POST" class="inline">
-                                        <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                    </form>
-                                {% endif %}
-                            </td>
+                            {% if (authUser.getTypeLabel() == 'Manager') %}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="/vacation_requests/edit/{{ request.id }}" class="text-blue-600 hover:text-blue-900 mr-4">Update</a>
+                                </td>
+                            {% endif %}
+                            {% if (authUser.getTypeLabel() == 'Employee') %}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    {% if request.status == 'Pending' %}
+                                        <form action="/vacation_requests/delete" method="POST" class="inline">
+                                            <input type="hidden" name="id" value="{{ request.id }}">
+                                            <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>

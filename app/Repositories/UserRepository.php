@@ -26,7 +26,7 @@ class UserRepository implements UserRepositoryInterface {
                 'id' => $user->getId(),
                 'userName' => $user->getUsername(),
                 'email' => $user->getEmail(),
-                'type' => $user->getType(),
+                'type' => $user->getTypeLabel(),
                 'employeeCode' => $user->getEmployeeCode(),
                 'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
                 'updatedAt' => $user->getUpdatedAt()->format('Y-m-d H:i:s'),
@@ -51,7 +51,7 @@ class UserRepository implements UserRepositoryInterface {
     }
 
     public function update(array $data): void {
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['id' => intval($data['id'])]);
         $user->setUsername($data['user_name']);
         $user->setEmail($data['email']);
         $user->setEmployeeCode($data['employee_code']);

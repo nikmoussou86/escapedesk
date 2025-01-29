@@ -24,13 +24,13 @@ class User
     #[Column(name: 'user_name')]
     private string $userName;
     
-    #[Column]
+    #[Column(unique: true)]
     private string $email;
     
     #[Column]
     private string $password;
 
-    #[Column(name: 'employee_code')]
+    #[Column(name: 'employee_code', length: 7, unique: true)]
     private string $employeeCode;
     
     #[Column]
@@ -42,7 +42,7 @@ class User
     #[Column(name: 'updated_at')]
     private \DateTime $updatedAt;
 
-    #[OneToMany(targetEntity: VacationRequest::class, mappedBy: 'user')]
+    #[OneToMany(targetEntity: VacationRequest::class, mappedBy: 'user', cascade: ['remove'])]
     private Collection $vacationRequests;
 
 
@@ -104,7 +104,12 @@ class User
         return $this;
     }
 
-    public function getType(): string
+    public function getType(): UserType
+    {
+        return $this->type;
+    }
+
+    public function getTypeLabel(): string
     {
         return ($this->type)->label();
     }
@@ -146,5 +151,21 @@ class User
     {
         $this->updatedAt = $updatedAt;
         return $this;
+    }
+
+    public function userIsManager(): bool
+    {
+        if ($this->getType() === UserType::MANAGER) {
+            return true;
+        }
+        return false;
+    }
+
+    public function userIsEmployee(): bool
+    {
+        if ($this->getType() === UserType::EMPLOYEE) {
+            return true;
+        }
+        return false;
     }
 }

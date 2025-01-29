@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
-interface SessionManagerInterface {
-    public function start(): void;
+interface SessionHandlerInterface {
     public function set(string $key, $value): void;
     public function get(string $key);
-    public function regenerate(): void;
+    public function has(string $key);
     public function destroy(): void;
 }

@@ -18,11 +18,18 @@ class VacationRequestRepository implements VacationRequestRepositoryInterface {
     {    
     }
 
-    public function findAll()
+    public function getThem(User $authUser)
     {
-        $vacationRequests = $this->entityManager
-            ->getRepository(VacationRequest::class)
-            ->findAll();
+        if ($authUser->userIsManager()) {
+            $vacationRequests = $this->entityManager
+                ->getRepository(VacationRequest::class)
+                ->findAll();
+        } else {
+            $vacationRequests = $this->entityManager
+                ->getRepository(VacationRequest::class)
+                ->findBy(['userId' => $authUser->getId()]); 
+        }
+
 
         $data = [];
         foreach ($vacationRequests as $vacationRequest) {
@@ -88,6 +95,15 @@ class VacationRequestRepository implements VacationRequestRepositoryInterface {
             ];
         }
 
+        return null;
+    }
+
+    public function findVacRequestById(int $vacationRequestId): ?VacationRequest
+    {
+        $vacationRequest = $this->entityManager->getRepository(VacationRequest::class)->findOneBy(['id' => $vacationRequestId]);
+        if ($vacationRequest) {
+            return $vacationRequest;
+        }
         return null;
     }
 }

@@ -1,11 +1,12 @@
 {% extends './base.twig' %}
 
-{% block title %}Edit User - My App{% endblock %}
+{% block title %}Edit User - escapedesk{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+<div class="w-full max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
     <h1 class="text-2xl font-semibold mb-4">Edit User</h1>
     <form action="/users/update" method="POST" class="space-y-4">
+        <input type="hidden" name="id" value="{{ user.id }}" />
         <div>
             <label for="user_name" class="block text-sm font-medium text-gray-700">Username</label>
             <input type="text" name="user_name" id="user_name" value="{{ user.userName }}" required class="block w-full mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
@@ -19,11 +20,15 @@
             <input type="password" name="password" id="password" required class="block w-full mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
         </div>
         <div>
+            <label for="employee_code" class="block text-sm font-medium text-gray-700">Employee Code</label>
+            <input type="text" name="employee_code" id="employee_code" value="{{ user.employeeCode }}" required class="block w-full mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+        </div>
+        <div>
             <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
             <select name="type" id="type" class="block w-full mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
                 <option value="" disabled {% if not user.type %}selected{% endif %}>Select type...</option>
-                <option value="1" {% if user.type == 1 %}selected{% endif %}>Manager</option>
-                <option value="2" {% if user.type == 2 %}selected{% endif %}>Employee</option>
+                <option value="1" {% if user.getTypeLabel() == 'Manager' %}selected{% endif %}>Manager</option>
+                <option value="2" {% if user.getTypeLabel() == 'Employee' %}selected{% endif %}>Employee</option>
             </select>
         </div>
         <div>
