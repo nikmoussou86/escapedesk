@@ -22,26 +22,37 @@ class VacationRequest
     #[Column]
     private string $reason;
 
-    #[Column('date_from')]
+    #[Column(name: 'date_from')]
     private \DateTime $dateFrom;
 
-    #[Column('date_to')]
+    #[Column(name: 'date_to')]
     private \DateTime $dateTo;
 
-    #[Column('request_status')]
+    #[Column(name: 'request_status')]
     private RequestStatus $requestStatus;
 
-    #[Column('user_id')]
+    #[Column(name: 'user_id')]
     private int $userId;
 
-    #[Column('created_at')]
+    #[Column(name: 'created_at')]
     private \DateTime $createdAt;
 
-    #[Column('updated_at')]
+    #[Column(name: 'updated_at')]
     private \DateTime $updatedAt;
 
-    #[ManyToOne(inversedBy: 'vacationRequests')]
+    #[ManyToOne(targetEntity: User::class, inversedBy: 'vacationRequests')]
     private User $user;
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+        return $this;
+    }
 
     public function getId(): int
     {
@@ -84,9 +95,9 @@ class VacationRequest
     }
 
     
-    public function getRequestStatus(): RequestStatus
+    public function getRequestStatus(): string
     {
-        return $this->requestStatus;
+        return ($this->requestStatus)->label();
     }
 
     public function setRequestStatus(RequestStatus $requestStatus): VacationRequest

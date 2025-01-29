@@ -10,23 +10,28 @@ use App\Repositories\UserRepository;
 use Psr\Container\ContainerInterface;
 use App\Repositories\BcryptPasswordHasher;
 use App\Repositories\NativeSessionManager;
+use App\Repositories\VacationRequestRepository;
 use App\Repositories\Contracts\PasswordHasherInterface;
 use App\Repositories\Contracts\SessionManagerInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Contracts\VacationRequestRepositoryInterface;
 
 $containerBuilder = new ContainerBuilder();
 
 $containerBuilder->addDefinitions([
     // Setup PDO
-    PDO::class => function () {
-        return new PDO("mysql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_NAME']}", $_ENV['DB_USER'], $_ENV['DB_PASS']);
-    },
+    // PDO::class => function () {
+    //     return new PDO("mysql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_NAME']}", $_ENV['DB_USER'], $_ENV['DB_PASS']);
+    // },
     // Doctrine EntityManager
     EntityManager::class => function () {
         return require 'doctrine.php';
     },
     UserRepositoryInterface::class => function (ContainerInterface $c) {
         return new UserRepository($c->get(EntityManager::class));
+    },
+    VacationRequestRepositoryInterface::class => function (ContainerInterface $c) {
+        return new VacationRequestRepository($c->get(EntityManager::class));
     },
     // Session manager
     SessionManagerInterface::class => function () {

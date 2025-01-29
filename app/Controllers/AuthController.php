@@ -22,18 +22,8 @@ class AuthController
 
     public function showLoginForm(): string
     {
-        // Render the login form using Twig
+        // Render the login form
         return $this->twig->render('auth/login.twig');
-        // Render a simple login form (this can be replaced with a proper templating engine).
-        // return <<<HTML
-        //     <form action="/login" method="POST">
-        //         <label for="email">Email:</label>
-        //         <input type="email" name="email" id="email" required>
-        //         <label for="password">Password:</label>
-        //         <input type="password" name="password" id="password" required>
-        //         <button type="submit">Login</button>
-        //     </form>
-        // HTML;
     }
 
     public function login(ServerRequestInterface $request): bool

@@ -21,7 +21,7 @@ class User
     #[Column, GeneratedValue]
     private int $id;
     
-    #[Column('user_name')]
+    #[Column(name: 'user_name')]
     private string $userName;
     
     #[Column]
@@ -30,16 +30,16 @@ class User
     #[Column]
     private string $password;
 
-    #[Column('employee_code')]
+    #[Column(name: 'employee_code')]
     private string $employeeCode;
     
     #[Column]
     private UserType $type;
 
-    #[Column('created_at')]
+    #[Column(name: 'created_at')]
     private \DateTime $createdAt;
 
-    #[Column('updated_at')]
+    #[Column(name: 'updated_at')]
     private \DateTime $updatedAt;
 
     #[OneToMany(targetEntity: VacationRequest::class, mappedBy: 'user')]
@@ -51,6 +51,20 @@ class User
         $this->vacationRequests = new ArrayCollection();
     }
 
+    public function getVacationRequests(): Collection
+    {
+        return $this->vacationRequests;
+    }
+
+    public function addVacationRequest(VacationRequest $vacationRequest): self
+    {
+        if (!$this->vacationRequests->contains($vacationRequest)) {
+            $this->vacationRequests[] = $vacationRequest;
+            $vacationRequest->setUser($this);
+        }
+
+        return $this;
+    }
 
     public function getId(): int
     {

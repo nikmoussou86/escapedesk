@@ -62,6 +62,9 @@ class UserController
 
         // Update the user in the database
         $this->userRepository->update($data);
+
+        header('Location: /users');
+        exit;
     }
 
     public function delete(ServerRequestInterface $request, array $params)

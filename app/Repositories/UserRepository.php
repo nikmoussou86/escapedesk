@@ -18,8 +18,22 @@ class UserRepository implements UserRepositoryInterface {
 
     public function findAll()
     {
-        $userRepository = $this->entityManager->getRepository(User::class);
-        return $userRepository->findAll();
+        $users = $this->entityManager->getRepository(User::class)->findAll();
+
+        $data = [];
+        foreach ($users as $user) {
+            $data[] = [
+                'id' => $user->getId(),
+                'userName' => $user->getUsername(),
+                'email' => $user->getEmail(),
+                'type' => $user->getType(),
+                'employeeCode' => $user->getEmployeeCode(),
+                'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updatedAt' => $user->getUpdatedAt()->format('Y-m-d H:i:s'),
+            ];
+        }
+        
+        return $data;
     }
 
     public function create(array $data): void {
