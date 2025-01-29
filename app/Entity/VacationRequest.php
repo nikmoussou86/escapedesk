@@ -20,7 +20,7 @@ class VacationRequest
     #[Column, GeneratedValue]
     private int $id;
 
-    #[Column]
+    #[Column(type: 'text')]
     private string $reason;
 
     #[Column(name: 'date_from')]
